@@ -56,12 +56,6 @@ class PictureCanvas extends Component {
   // calculated based on canvas' x,y position, mouse position, and pixel scale
   pointerPosition(pos, domNode) {
     let rect = domNode.getBoundingClientRect();
-    console.log(
-      'x:',
-      Math.floor((pos.clientX - rect.left) / this.scale),
-      'y:',
-      Math.floor((pos.clientY - rect.top) / this.scale)
-    );
     return {
       x: Math.floor((pos.clientX - rect.left) / this.scale),
       y: Math.floor((pos.clientY - rect.top) / this.scale)

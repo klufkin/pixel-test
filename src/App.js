@@ -30,6 +30,22 @@ class App extends Component {
           <h1 className="App-title">Welcome to Pixel Editor</h1>
         </header>
         <PictureCanvas picture={this.state.picture} draw={this.draw} />
+
+        <div className="settings">
+          <label>
+            <span role="img" aria-label="Pixel Color">
+              🎨
+            </span>Color:{' '}
+            <input
+              type="color"
+              value={this.state.color}
+              onChange={e => {
+                console.log(e.target.value);
+                this.setState({ color: e.target.value });
+              }}
+            />
+          </label>
+        </div>
       </div>
     );
   }
