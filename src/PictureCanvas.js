@@ -3,10 +3,15 @@ import React, { Component } from 'react';
 class PictureCanvas extends Component {
   constructor(props) {
     super();
+
+    this.state = {
+      picture: props.picture,
+      startPos: { x: 0, y: 0 }
+    };
+
     // determines the scale of the pixel
     // pixel is drawn as a 10x10 square
     this.scale = 10;
-
     this.mouseDown = this.mouseDown.bind(this);
   }
 
@@ -19,23 +24,25 @@ class PictureCanvas extends Component {
   setPicture(picture, canvas, scale) {
     canvas.width = picture.width * scale;
     canvas.height = picture.height * scale;
-    this.cx = canvas.getContext('2d');
+    this.ctx = canvas.getContext('2d');
   }
 
   // Fills canvas with a series of squares, aka pixels.
   drawPicture(picture, canvas, scale) {
     for (let y = 0; y < picture.height; y++) {
       for (let x = 0; x < picture.width; x++) {
-        this.cx.fillStyle = picture.pixel(x, y);
-        this.cx.fillRect(x * scale, y * scale, scale, scale);
+        this.ctx.fillStyle = picture.pixel(x, y);
+        this.ctx.fillRect(x * scale, y * scale, scale, scale);
       }
     }
   }
 
-  mouseDown(downEvent) {
+  mouseDown(downEvent, onDown) {
     if (downEvent.button !== 0) return; // button is always 0 on mousemove - remove?
     let pos = this.pointerPosition(downEvent, this.canvas);
+
     let move = moveEvent => {
+      console.log('moving');
       if (moveEvent.buttons === 0) {
         // remove move event listener on lifting of mouse
         this.canvas.removeEventListener('mousemove', move);
@@ -43,12 +50,22 @@ class PictureCanvas extends Component {
         // update mouse pixel position
         let newPos = this.pointerPosition(moveEvent, this.canvas);
         if (newPos.x === pos.x && newPos.y === pos.y) return;
-        pos = newPos;
-        this.props.draw(pos);
+
+        const newPicture = this.props.draw({
+          start: pos,
+          current: newPos,
+          picture: this.state.picture
+        });
+        this.setState({ picture: newPicture });
       }
     };
+    const newPicture = this.props.draw({
+      start: pos,
+      current: pos,
+      picture: this.state.picture
+    });
+    this.setState({ startPos: pos, picture: newPicture });
 
-    this.props.draw(pos);
     this.canvas.addEventListener('mousemove', move);
   }
 
@@ -64,12 +81,17 @@ class PictureCanvas extends Component {
 
   render() {
     if (this.canvas)
-      this.drawPicture(this.props.picture, this.canvas, this.scale);
+      this.drawPicture(this.state.picture, this.canvas, this.scale);
     return (
       <canvas
         ref={node => (this.canvas = node)}
         style={{ border: '1px solid black' }}
-        onMouseDown={this.mouseDown}
+        onMouseDown={event => {
+          this.mouseDown(event, this.props.draw);
+        }}
+        onMouseUp={() => {
+          this.props.updateEditor(this.state.picture);
+        }}
       />
     );
   }
