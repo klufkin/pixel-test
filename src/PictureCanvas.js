@@ -81,10 +81,15 @@ class PictureCanvas extends Component {
   // Returns the mouse pixel position,
   // calculated based on canvas' x,y position, mouse position, and pixel scale
   pointerPosition(pos, domNode) {
-    let rect = domNode.getBoundingClientRect();
+    const { left, top } = domNode.getBoundingClientRect();
+    const calcX = Math.floor((pos.clientX - left) / this.scale);
+    const calcY = Math.floor((pos.clientY - top) / this.scale);
+
+    // ternary operator to handle fractional boundingClientRect properties
+    // used to prevent negative indices
     return {
-      x: Math.floor((pos.clientX - rect.left) / this.scale),
-      y: Math.floor((pos.clientY - rect.top) / this.scale)
+      x: calcX > 0 ? calcX : 0,
+      y: calcY > 0 ? calcY : 0
     };
   }
 
@@ -95,7 +100,6 @@ class PictureCanvas extends Component {
     return (
       <canvas
         ref={node => (this.canvas = node)}
-        style={{ border: '1px solid black' }}
         onMouseDown={event => {
           this.mouseDown(event, this.props.draw);
         }}
