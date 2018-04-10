@@ -16,6 +16,7 @@ class App extends Component {
 
     this.draw = this.draw.bind(this);
     this.rectangle = this.rectangle.bind(this);
+    this.fill = this.fill.bind(this);
     this.updatePicture = this.updatePicture.bind(this);
     this.changeTool = this.changeTool.bind(this);
   }
@@ -25,7 +26,7 @@ class App extends Component {
     return picture.draw([pixel]);
   }
 
-  rectangle({ start, current, picture }) {
+  rectangle({ start, current }) {
     let xStart = Math.min(start.x, current.x);
     let yStart = Math.min(start.y, current.y);
     let xEnd = Math.max(start.x, current.x);
@@ -41,6 +42,45 @@ class App extends Component {
     return this.state.picture.draw(drawnRectangle);
   }
 
+  fill({ start }) {
+    const { picture, color } = this.state;
+
+    // Pixel look around
+    const lookAround = [
+      { dx: -1, dy: 0 },
+      { dx: 1, dy: 0 },
+      { dx: 0, dy: -1 },
+      { dx: 0, dy: 1 }
+    ];
+
+    // pixel color to change
+    const targetColor = picture.pixel(start.x, start.y);
+    let fillSpace = [{ x: start.x, y: start.y, color: color }];
+
+    for (let i = 0; i < fillSpace.length; i++) {
+      for (let { dx, dy } of lookAround) {
+        const x = fillSpace[i].x + dx;
+        const y = fillSpace[i].y + dy;
+        const withinCanvas =
+          x >= 0 && x < picture.width && y >= 0 && y < picture.height;
+        // check if pixel has already been added to fill space
+        const pixelFound = fillSpace.some(
+          pixel => pixel.x === x && pixel.y === y
+        );
+
+        if (
+          withinCanvas &&
+          picture.pixel(x, y) === targetColor &&
+          !pixelFound
+        ) {
+          fillSpace.push({ x, y, color: color });
+        }
+      }
+    }
+
+    return picture.draw(fillSpace);
+  }
+
   updatePicture(picture) {
     this.setState({ picture });
   }
@@ -50,7 +90,11 @@ class App extends Component {
   }
 
   render() {
-    const tools = { draw: this.draw, rectangle: this.rectangle };
+    const tools = {
+      draw: this.draw,
+      rectangle: this.rectangle,
+      fill: this.fill
+    };
 
     return (
       <div className="App">
@@ -80,6 +124,7 @@ class App extends Component {
               >
                 <option value="draw">Draw</option>
                 <option value="rectangle">Rectangle</option>
+                <option value="fill">Fill</option>
               </select>
             </label>
 

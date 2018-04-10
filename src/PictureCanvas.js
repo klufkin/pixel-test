@@ -13,11 +13,21 @@ class PictureCanvas extends Component {
     // pixel is drawn as a 10x10 square
     this.scale = 10;
     this.mouseDown = this.mouseDown.bind(this);
+
+    this.savePicture = () => {
+      this.props.updateEditor(this.state.picture);
+    };
   }
 
   componentDidMount() {
     this.setPicture(this.props.picture, this.canvas, this.scale);
     this.drawPicture(this.props.picture, this.canvas, this.scale);
+
+    document.addEventListener('mouseup', this.savePicture);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mouseup', this.savePicture);
   }
 
   // sets the size of the canvas based on the scale and picture size,
@@ -42,7 +52,6 @@ class PictureCanvas extends Component {
     let pos = this.pointerPosition(downEvent, this.canvas);
 
     let move = moveEvent => {
-      console.log('moving');
       if (moveEvent.buttons === 0) {
         // remove move event listener on lifting of mouse
         this.canvas.removeEventListener('mousemove', move);
@@ -82,15 +91,13 @@ class PictureCanvas extends Component {
   render() {
     if (this.canvas)
       this.drawPicture(this.state.picture, this.canvas, this.scale);
+
     return (
       <canvas
         ref={node => (this.canvas = node)}
         style={{ border: '1px solid black' }}
         onMouseDown={event => {
           this.mouseDown(event, this.props.draw);
-        }}
-        onMouseUp={() => {
-          this.props.updateEditor(this.state.picture);
         }}
       />
     );
