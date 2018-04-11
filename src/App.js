@@ -17,6 +17,7 @@ class App extends Component {
     this.draw = this.draw.bind(this);
     this.rectangle = this.rectangle.bind(this);
     this.fill = this.fill.bind(this);
+    this.colorPicker = this.colorPicker.bind(this);
     this.updatePicture = this.updatePicture.bind(this);
     this.changeTool = this.changeTool.bind(this);
   }
@@ -81,6 +82,11 @@ class App extends Component {
     return picture.draw(fillSpace);
   }
 
+  colorPicker({ current }) {
+    this.setState({ color: this.state.picture.pixel(current.x, current.y) });
+    return this.state.picture;
+  }
+
   updatePicture(picture) {
     this.setState({ picture });
   }
@@ -93,7 +99,8 @@ class App extends Component {
     const tools = {
       draw: this.draw,
       rectangle: this.rectangle,
-      fill: this.fill
+      fill: this.fill,
+      colorPicker: this.colorPicker
     };
 
     return (
@@ -125,6 +132,7 @@ class App extends Component {
                 <option value="draw">Draw</option>
                 <option value="rectangle">Rectangle</option>
                 <option value="fill">Fill</option>
+                <option value="colorPicker">Color Picker</option>
               </select>
             </label>
 
