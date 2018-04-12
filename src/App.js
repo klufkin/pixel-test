@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 import Picture from './Picture';
@@ -106,7 +105,6 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <h1 className="App-title">Welcome to Pixel Editor</h1>
         </header>
 
@@ -148,6 +146,13 @@ class App extends Component {
                 }}
               />
             </label>
+
+            {/* <button>
+              <span role="img" aria-label="Save">
+                💾
+              </span>{' '}
+              Save
+            </button> */}
           </div>
         </div>
       </div>
