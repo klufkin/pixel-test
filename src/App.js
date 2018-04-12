@@ -19,6 +19,7 @@ class App extends Component {
     this.colorPicker = this.colorPicker.bind(this);
     this.updatePicture = this.updatePicture.bind(this);
     this.changeTool = this.changeTool.bind(this);
+    this.savePicture = this.savePicture.bind(this);
   }
 
   draw({ current, picture }) {
@@ -94,6 +95,20 @@ class App extends Component {
     this.setState({ tool });
   }
 
+  savePicture() {
+    const link = document.createElement('a');
+
+    Object.assign(link, {
+      href: this.picture.canvas.toDataURL(),
+      download: 'pixelart.png'
+    });
+
+    // Create and trigger dowload link
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   render() {
     const tools = {
       draw: this.draw,
@@ -113,6 +128,7 @@ class App extends Component {
             picture={this.state.picture}
             draw={tools[this.state.tool]}
             updateEditor={this.updatePicture}
+            ref={node => (this.picture = node)}
           />
 
           <div className="settings">
@@ -147,12 +163,12 @@ class App extends Component {
               />
             </label>
 
-            {/* <button>
+            <button onClick={this.savePicture}>
               <span role="img" aria-label="Save">
                 💾
               </span>{' '}
               Save
-            </button> */}
+            </button>
           </div>
         </div>
       </div>
