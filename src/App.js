@@ -11,8 +11,8 @@ class App extends Component {
       tool: 'draw',
       color: '#000000',
       picture: Picture.empty(60, 30, '#f0f0f0'),
-      history: [],
-      saveHistoryTime: 0
+      canvasState: Picture.empty(60, 30, '#f0f0f0'),
+      history: []
     };
 
     this.draw = this.draw.bind(this);
@@ -28,10 +28,12 @@ class App extends Component {
 
   draw({ current, picture }) {
     const pixel = { x: current.x, y: current.y, color: this.state.color };
-    return picture.draw([pixel]);
+    this.setState({ canvasState: picture.draw([pixel]) });
   }
 
   rectangle({ start, current }) {
+    const { color, picture } = this.state;
+
     let xStart = Math.min(start.x, current.x);
     let yStart = Math.min(start.y, current.y);
     let xEnd = Math.max(start.x, current.x);
@@ -40,11 +42,11 @@ class App extends Component {
 
     for (let y = yStart; y <= yEnd; y++) {
       for (let x = xStart; x <= xEnd; x++) {
-        drawnRectangle.push({ x, y, color: this.state.color });
+        drawnRectangle.push({ x, y, color: color });
       }
     }
 
-    return this.state.picture.draw(drawnRectangle);
+    this.setState({ canvasState: picture.draw(drawnRectangle) });
   }
 
   fill({ start }) {
@@ -83,12 +85,11 @@ class App extends Component {
       }
     }
 
-    return picture.draw(fillSpace);
+    this.setState({ canvasState: picture.draw(fillSpace) });
   }
 
   colorPicker({ current }) {
     this.setState({ color: this.state.picture.pixel(current.x, current.y) });
-    return this.state.picture;
   }
 
   updatePicture(picture) {
@@ -115,23 +116,18 @@ class App extends Component {
 
   undo() {
     if (this.state.history.length === 0) return;
-    console.log(this.state.history, this.state.history.slice(1));
 
     this.setState({
       picture: this.state.history[0],
-      history: this.state.history.slice(1),
-      saveHistoryTime: 0
+      canvasState: this.state.history[0],
+      history: this.state.history.slice(1)
     });
   }
 
   saveHistory(picture) {
-    if (this.state.saveHistoryTime < Date.now() - 1000) {
-      console.log('save history');
-      this.setState({
-        history: [this.state.picture, ...this.state.history],
-        saveHistoryTime: Date.now()
-      });
-    }
+    this.setState({
+      history: [picture, ...this.state.history]
+    });
   }
 
   render() {
@@ -151,6 +147,7 @@ class App extends Component {
         <div className="pixel-editor">
           <PictureCanvas
             picture={this.state.picture}
+            canvasState={this.state.canvasState}
             saveHistory={this.saveHistory}
             draw={tools[this.state.tool]}
             updateEditor={this.updatePicture}
@@ -165,7 +162,6 @@ class App extends Component {
               <select
                 value={this.state.tool}
                 onChange={e => {
-                  console.log(e.target.value);
                   this.changeTool(e.target.value);
                 }}
               >

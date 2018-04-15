@@ -5,7 +5,6 @@ class PictureCanvas extends Component {
     super();
 
     this.state = {
-      picture: props.picture,
       startPos: { x: 0, y: 0 }
     };
 
@@ -15,8 +14,7 @@ class PictureCanvas extends Component {
     this.mouseDown = this.mouseDown.bind(this);
 
     this.savePicture = () => {
-      this.props.updateEditor(this.state.picture);
-      this.props.saveHistory();
+      this.props.updateEditor(this.props.canvasState);
       document.removeEventListener('mouseup', this.savePicture);
     };
   }
@@ -48,6 +46,9 @@ class PictureCanvas extends Component {
   }
 
   mouseDown(downEvent, onDown) {
+    // save canvas state - to allow for undoing
+    this.props.saveHistory(this.props.canvasState);
+
     document.addEventListener('mouseup', this.savePicture);
 
     if (downEvent.button !== 0) return; // button is always 0 on mousemove - remove?
@@ -62,21 +63,20 @@ class PictureCanvas extends Component {
         let newPos = this.pointerPosition(moveEvent, this.canvas);
         if (newPos.x === pos.x && newPos.y === pos.y) return;
 
-        const newPicture = this.props.draw({
+        this.props.draw({
           start: pos,
           current: newPos,
-          picture: this.state.picture
+          picture: this.props.canvasState
         });
-        this.setState({ picture: newPicture });
       }
     };
 
-    const newPicture = this.props.draw({
+    this.props.draw({
       start: pos,
       current: pos,
-      picture: this.state.picture
+      picture: this.props.canvasState
     });
-    this.setState({ startPos: pos, picture: newPicture });
+    this.setState({ startPos: pos });
 
     this.canvas.addEventListener('mousemove', move);
   }
@@ -98,7 +98,7 @@ class PictureCanvas extends Component {
 
   render() {
     if (this.canvas)
-      this.drawPicture(this.state.picture, this.canvas, this.scale);
+      this.drawPicture(this.props.canvasState, this.canvas, this.scale);
 
     return (
       <canvas
