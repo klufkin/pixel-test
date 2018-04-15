@@ -16,14 +16,14 @@ class PictureCanvas extends Component {
 
     this.savePicture = () => {
       this.props.updateEditor(this.state.picture);
+      this.props.saveHistory();
+      document.removeEventListener('mouseup', this.savePicture);
     };
   }
 
   componentDidMount() {
     this.setPicture(this.props.picture, this.canvas, this.scale);
     this.drawPicture(this.props.picture, this.canvas, this.scale);
-
-    document.addEventListener('mouseup', this.savePicture);
   }
 
   componentWillUnmount() {
@@ -48,6 +48,8 @@ class PictureCanvas extends Component {
   }
 
   mouseDown(downEvent, onDown) {
+    document.addEventListener('mouseup', this.savePicture);
+
     if (downEvent.button !== 0) return; // button is always 0 on mousemove - remove?
     let pos = this.pointerPosition(downEvent, this.canvas);
 
@@ -68,6 +70,7 @@ class PictureCanvas extends Component {
         this.setState({ picture: newPicture });
       }
     };
+
     const newPicture = this.props.draw({
       start: pos,
       current: pos,

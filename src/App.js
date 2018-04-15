@@ -10,7 +10,9 @@ class App extends Component {
     this.state = {
       tool: 'draw',
       color: '#000000',
-      picture: Picture.empty(60, 30, '#f0f0f0')
+      picture: Picture.empty(60, 30, '#f0f0f0'),
+      history: [],
+      saveHistoryTime: 0
     };
 
     this.draw = this.draw.bind(this);
@@ -20,6 +22,8 @@ class App extends Component {
     this.updatePicture = this.updatePicture.bind(this);
     this.changeTool = this.changeTool.bind(this);
     this.savePicture = this.savePicture.bind(this);
+    this.undo = this.undo.bind(this);
+    this.saveHistory = this.saveHistory.bind(this);
   }
 
   draw({ current, picture }) {
@@ -109,6 +113,27 @@ class App extends Component {
     link.remove();
   }
 
+  undo() {
+    if (this.state.history.length === 0) return;
+    console.log(this.state.history, this.state.history.slice(1));
+
+    this.setState({
+      picture: this.state.history[0],
+      history: this.state.history.slice(1),
+      saveHistoryTime: 0
+    });
+  }
+
+  saveHistory(picture) {
+    if (this.state.saveHistoryTime < Date.now() - 1000) {
+      console.log('save history');
+      this.setState({
+        history: [this.state.picture, ...this.state.history],
+        saveHistoryTime: Date.now()
+      });
+    }
+  }
+
   render() {
     const tools = {
       draw: this.draw,
@@ -126,6 +151,7 @@ class App extends Component {
         <div className="pixel-editor">
           <PictureCanvas
             picture={this.state.picture}
+            saveHistory={this.saveHistory}
             draw={tools[this.state.tool]}
             updateEditor={this.updatePicture}
             ref={node => (this.picture = node)}
@@ -162,6 +188,8 @@ class App extends Component {
                 }}
               />
             </label>
+
+            <button onClick={this.undo}>Undo</button>
 
             <button onClick={this.savePicture}>
               <span role="img" aria-label="Save">
