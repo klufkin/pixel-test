@@ -26,9 +26,9 @@ class App extends Component {
     this.saveHistory = this.saveHistory.bind(this);
   }
 
-  draw({ current, picture }) {
+  draw({ current }) {
     const pixel = { x: current.x, y: current.y, color: this.state.color };
-    this.setState({ canvasState: picture.draw([pixel]) });
+    this.setState({ canvasState: this.state.canvasState.draw([pixel]) });
   }
 
   rectangle({ start, current }) {
@@ -92,8 +92,8 @@ class App extends Component {
     this.setState({ color: this.state.picture.pixel(current.x, current.y) });
   }
 
-  updatePicture(picture) {
-    this.setState({ picture });
+  updatePicture() {
+    this.setState({ picture: this.state.canvasState });
   }
 
   changeTool(tool) {
@@ -124,9 +124,9 @@ class App extends Component {
     });
   }
 
-  saveHistory(picture) {
+  saveHistory() {
     this.setState({
-      history: [picture, ...this.state.history]
+      history: [this.state.canvasState, ...this.state.history]
     });
   }
 
@@ -146,7 +146,6 @@ class App extends Component {
 
         <div className="pixel-editor">
           <PictureCanvas
-            picture={this.state.picture}
             canvasState={this.state.canvasState}
             saveHistory={this.saveHistory}
             draw={tools[this.state.tool]}

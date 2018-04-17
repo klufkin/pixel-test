@@ -14,14 +14,14 @@ class PictureCanvas extends Component {
     this.mouseDown = this.mouseDown.bind(this);
 
     this.savePicture = () => {
-      this.props.updateEditor(this.props.canvasState);
+      this.props.updateEditor();
       document.removeEventListener('mouseup', this.savePicture);
     };
   }
 
   componentDidMount() {
-    this.setPicture(this.props.picture, this.canvas, this.scale);
-    this.drawPicture(this.props.picture, this.canvas, this.scale);
+    this.setPicture(this.props.canvasState, this.canvas, this.scale);
+    this.drawPicture(this.props.canvasState, this.canvas, this.scale);
   }
 
   componentWillUnmount() {
@@ -47,7 +47,7 @@ class PictureCanvas extends Component {
 
   mouseDown(downEvent, onDown) {
     // save canvas state - to allow for undoing
-    this.props.saveHistory(this.props.canvasState);
+    this.props.saveHistory();
 
     document.addEventListener('mouseup', this.savePicture);
 
@@ -65,16 +65,14 @@ class PictureCanvas extends Component {
 
         this.props.draw({
           start: pos,
-          current: newPos,
-          picture: this.props.canvasState
+          current: newPos
         });
       }
     };
 
     this.props.draw({
       start: pos,
-      current: pos,
-      picture: this.props.canvasState
+      current: pos
     });
     this.setState({ startPos: pos });
 
