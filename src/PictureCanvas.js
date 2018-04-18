@@ -5,7 +5,8 @@ class PictureCanvas extends Component {
     super();
 
     this.state = {
-      startPos: { x: 0, y: 0 }
+      startPos: { x: 0, y: 0 },
+      lastPos: { x: 0, y: 0 }
     };
 
     // determines the scale of the pixel
@@ -65,16 +66,19 @@ class PictureCanvas extends Component {
 
         this.props.draw({
           start: pos,
+          lastPos: this.state.lastPos,
           current: newPos
         });
+        this.setState({ lastPos: newPos });
       }
     };
 
     this.props.draw({
       start: pos,
+      lastPos: pos,
       current: pos
     });
-    this.setState({ startPos: pos });
+    this.setState({ startPos: pos, lastPos: pos });
 
     this.canvas.addEventListener('mousemove', move);
   }

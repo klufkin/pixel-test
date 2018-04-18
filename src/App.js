@@ -3,6 +3,7 @@ import './App.css';
 
 import Picture from './Picture';
 import PictureCanvas from './PictureCanvas';
+import Trig from './trig';
 
 class App extends Component {
   constructor() {
@@ -26,9 +27,21 @@ class App extends Component {
     this.saveHistory = this.saveHistory.bind(this);
   }
 
-  draw({ current }) {
-    const pixel = { x: current.x, y: current.y, color: this.state.color };
-    this.setState({ canvasState: this.state.canvasState.draw([pixel]) });
+  draw({ lastPos, current }) {
+    const distance = Trig.distanceBetween2Points(lastPos, current);
+    const angle = Trig.angleBetween2Points(lastPos, current);
+
+    // Draws a contiguous line of pixels
+    // between the last position and the current position regardless of mouse movement speed
+    let canvas = this.state.canvasState;
+    for (let z = 0; z <= distance; z++) {
+      const x = Math.floor(lastPos.x + Math.sin(angle) * z);
+      const y = Math.floor(lastPos.y + Math.cos(angle) * z);
+      const pixel = { x, y, color: this.state.color };
+      canvas = canvas.draw([pixel]);
+    }
+
+    this.setState({ canvasState: canvas });
   }
 
   rectangle({ start, current }) {
