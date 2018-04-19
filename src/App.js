@@ -197,7 +197,12 @@ class App extends Component {
               />
             </label>
 
-            <button onClick={this.undo}>Undo</button>
+            <button onClick={this.undo}>
+              <span role="img" aria-label="Undo">
+                ⏪
+              </span>{' '}
+              Undo
+            </button>
 
             <button onClick={this.savePicture}>
               <span role="img" aria-label="Save">
