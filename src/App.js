@@ -23,6 +23,8 @@ class App extends Component {
     this.updatePicture = this.updatePicture.bind(this);
     this.changeTool = this.changeTool.bind(this);
     this.savePicture = this.savePicture.bind(this);
+    this.loadImage = this.loadImage.bind(this);
+    this.pictureFromImage = this.pictureFromImage.bind(this);
     this.undo = this.undo.bind(this);
     this.saveHistory = this.saveHistory.bind(this);
   }
@@ -127,6 +129,66 @@ class App extends Component {
     link.remove();
   }
 
+  loadImage() {
+    console.log('load image click');
+    const loadInput = document.createElement('input');
+    loadInput.setAttribute('type', 'file');
+
+    loadInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      console.log(file);
+      if (!file) return;
+
+      // create file reader to get access to file's contents
+      const reader = new FileReader();
+
+      // trigger once file has completed loading
+      reader.addEventListener('load', () => {
+        console.log('reader loaded');
+        // File reader gives us a data URL, use this to create an image so we can gather pixel data
+        const image = document.createElement('img');
+        image.onload = () => {
+          console.log('on loaaad');
+          const pixels = this.pictureFromImage(image);
+          this.setState({ picture: pixels, canvasState: pixels });
+        };
+        image.setAttribute('src', reader.result);
+      });
+      // NOTE: weird performance issue occuring after load
+      // read file data
+      reader.readAsDataURL(file);
+    });
+
+    // Trigger file loader, and clean up DOM
+    document.body.appendChild(loadInput);
+    loadInput.click();
+    loadInput.remove();
+  }
+  pictureFromImage(image) {
+    let width = image.width;
+    let height = image.height;
+    let canvas = document.createElement('canvas');
+    canvas.height = height;
+    canvas.width = width;
+
+    let cx = canvas.getContext('2d');
+    cx.drawImage(image, 0, 0, width, height);
+
+    let pixels = [];
+    let { data } = cx.getImageData(0, 0, width, height);
+
+    function hex(n) {
+      return n.toString(16).padStart(2, '0');
+    }
+    // !! need to pull out scale factor -- V --
+    for (let i = 0; i < data.length; i += 40) {
+      let [r, g, b] = data.slice(i, i + 3);
+      pixels.push('#' + hex(r) + hex(g) + hex(b));
+    }
+    console.log(pixels);
+    return new Picture(width, height, pixels);
+  }
+
   undo() {
     if (this.state.history.length === 0) return;
 
@@ -209,6 +271,13 @@ class App extends Component {
                 💾
               </span>{' '}
               Save
+            </button>
+
+            <button onClick={this.loadImage}>
+              <span role="img" aria-label="Load">
+                📁
+              </span>{' '}
+              Load
             </button>
           </div>
         </div>
