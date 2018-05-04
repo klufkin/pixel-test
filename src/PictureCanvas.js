@@ -13,6 +13,7 @@ class PictureCanvas extends Component {
     // pixel is drawn as a 10x10 square
     this.scale = 10;
     this.mouseDown = this.mouseDown.bind(this);
+    this.mouseMove = this.mouseMove.bind(this);
 
     this.savePicture = () => {
       this.props.updateEditor();
@@ -47,6 +48,25 @@ class PictureCanvas extends Component {
     }
   }
 
+  mouseMove(moveEvent) {
+    if (moveEvent.buttons === 0) {
+      // remove move event listener on lifting of mouse
+      this.canvas.removeEventListener('mousemove', this.mouseMove);
+    } else {
+      const pos = this.state.startPos;
+      // update mouse pixel position
+      let newPos = this.pointerPosition(moveEvent, this.canvas);
+      if (newPos.x === pos.x && newPos.y === pos.y) return;
+
+      this.props.draw({
+        start: pos,
+        lastPos: this.state.lastPos,
+        current: newPos
+      });
+      this.setState({ lastPos: newPos });
+    }
+  }
+
   mouseDown(downEvent, onDown) {
     // save canvas state - to allow for undoing
     this.props.saveHistory();
@@ -56,24 +76,6 @@ class PictureCanvas extends Component {
     if (downEvent.button !== 0) return; // button is always 0 on mousemove - remove?
     let pos = this.pointerPosition(downEvent, this.canvas);
 
-    let move = moveEvent => {
-      if (moveEvent.buttons === 0) {
-        // remove move event listener on lifting of mouse
-        this.canvas.removeEventListener('mousemove', move);
-      } else {
-        // update mouse pixel position
-        let newPos = this.pointerPosition(moveEvent, this.canvas);
-        if (newPos.x === pos.x && newPos.y === pos.y) return;
-
-        this.props.draw({
-          start: pos,
-          lastPos: this.state.lastPos,
-          current: newPos
-        });
-        this.setState({ lastPos: newPos });
-      }
-    };
-
     this.props.draw({
       start: pos,
       lastPos: pos,
@@ -81,7 +83,7 @@ class PictureCanvas extends Component {
     });
     this.setState({ startPos: pos, lastPos: pos });
 
-    this.canvas.addEventListener('mousemove', move);
+    this.canvas.addEventListener('mousemove', this.mouseMove);
   }
 
   // Returns the mouse pixel position,
@@ -107,6 +109,7 @@ class PictureCanvas extends Component {
       <canvas
         ref={node => (this.canvas = node)}
         onMouseDown={event => {
+          console.log('mouse down');
           this.mouseDown(event, this.props.draw);
         }}
       />
