@@ -16,6 +16,7 @@ class PictureCanvas extends Component {
 
     this.savePicture = () => {
       this.props.updateEditor();
+      console.log('remove mouse up');
       document.removeEventListener('mouseup', this.savePicture);
     };
   }

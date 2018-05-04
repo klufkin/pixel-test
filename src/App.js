@@ -5,6 +5,8 @@ import Picture from './Picture';
 import PictureCanvas from './PictureCanvas';
 import Trig from './trig';
 
+let irender = 0;
+
 class App extends Component {
   constructor() {
     super();
@@ -157,13 +159,14 @@ class App extends Component {
       // NOTE: weird performance issue occuring after load
       // read file data
       reader.readAsDataURL(file);
+      loadInput.remove();
     });
 
     // Trigger file loader, and clean up DOM
     document.body.appendChild(loadInput);
     loadInput.click();
-    loadInput.remove();
   }
+
   pictureFromImage(image) {
     let width = image.width;
     let height = image.height;
@@ -212,7 +215,8 @@ class App extends Component {
       fill: this.fill,
       colorPicker: this.colorPicker
     };
-
+    console.log(irender);
+    irender++;
     return (
       <div className="App">
         <header className="App-header">
@@ -222,8 +226,8 @@ class App extends Component {
         <div className="pixel-editor">
           <PictureCanvas
             canvasState={this.state.canvasState}
-            saveHistory={this.saveHistory}
             draw={tools[this.state.tool]}
+            saveHistory={this.saveHistory}
             updateEditor={this.updatePicture}
             ref={node => (this.picture = node)}
           />
