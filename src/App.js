@@ -5,8 +5,6 @@ import Picture from './Picture';
 import PictureCanvas from './PictureCanvas';
 import Trig from './trig';
 
-let irender = 0;
-
 class App extends Component {
   constructor() {
     super();
@@ -132,13 +130,11 @@ class App extends Component {
   }
 
   loadImage() {
-    console.log('load image click');
     const loadInput = document.createElement('input');
     loadInput.setAttribute('type', 'file');
 
     loadInput.addEventListener('change', e => {
       const file = e.target.files[0];
-      console.log(file);
       if (!file) return;
 
       // create file reader to get access to file's contents
@@ -146,17 +142,15 @@ class App extends Component {
 
       // trigger once file has completed loading
       reader.addEventListener('load', () => {
-        console.log('reader loaded');
         // File reader gives us a data URL, use this to create an image so we can gather pixel data
         const image = document.createElement('img');
         image.onload = () => {
-          console.log('on loaaad');
           const pixels = this.pictureFromImage(image);
+          // const pixels = Picture.empty(60, 30, '#f0f0f0');
           this.setState({ picture: pixels, canvasState: pixels });
         };
         image.setAttribute('src', reader.result);
       });
-      // NOTE: weird performance issue occuring after load
       // read file data
       reader.readAsDataURL(file);
       loadInput.remove();
@@ -167,6 +161,8 @@ class App extends Component {
     loadInput.click();
   }
 
+  // NOTE: weird performance issue occuring after load
+  // Something wong with this function (particularly the picture function..)
   pictureFromImage(image) {
     let width = image.width;
     let height = image.height;
@@ -183,13 +179,27 @@ class App extends Component {
     function hex(n) {
       return n.toString(16).padStart(2, '0');
     }
-    // !! need to pull out scale factor -- V --
-    for (let i = 0; i < data.length; i += 40) {
+
+    const scale = 10; // the pixel scale factor
+    const pixelRowData = width * 4; // the width of the image data
+    const level = width * 4 * scale; // the jump to the next pixel
+    let y = 0; // what y position we are at
+    for (let i = 0; i < data.length; i += scale * 4) {
+      // jump to the next pixel y position
+      if (i >= level * y + pixelRowData) {
+        y++;
+        i = level * y;
+      }
+
+      // exit once reached data limit (to prevent undefined error)
+      if (i >= data.length) break;
+
       let [r, g, b] = data.slice(i, i + 3);
       pixels.push('#' + hex(r) + hex(g) + hex(b));
     }
-    console.log(pixels);
-    return new Picture(width, height, pixels);
+    const picture = new Picture(width / scale, height / scale, pixels);
+
+    return picture;
   }
 
   undo() {
@@ -215,8 +225,7 @@ class App extends Component {
       fill: this.fill,
       colorPicker: this.colorPicker
     };
-    console.log(irender);
-    irender++;
+
     return (
       <div className="App">
         <header className="App-header">

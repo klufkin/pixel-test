@@ -17,7 +17,6 @@ class PictureCanvas extends Component {
 
     this.savePicture = () => {
       this.props.updateEditor();
-      console.log('remove mouse up');
       document.removeEventListener('mouseup', this.savePicture);
     };
   }
@@ -109,7 +108,6 @@ class PictureCanvas extends Component {
       <canvas
         ref={node => (this.canvas = node)}
         onMouseDown={event => {
-          console.log('mouse down');
           this.mouseDown(event, this.props.draw);
         }}
       />
